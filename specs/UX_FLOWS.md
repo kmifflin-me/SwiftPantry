@@ -1,4 +1,4 @@
-# UX Flows — SwiftPantry (MealPrepPro)
+# UX Flows — SwiftPantry (SwiftPantry)
 
 **Version:** 1.0
 **Date:** 2026-03-19

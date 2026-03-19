@@ -1,4 +1,4 @@
-# Product Requirements Document — MealPrepPro
+# Product Requirements Document — SwiftPantry
 
 **Version:** 1.0
 **Date:** 2026-03-19
@@ -8,7 +8,7 @@
 
 ## 1. Product Overview
 
-MealPrepPro is a single-user ASP.NET Razor Pages web application for personal meal prep planning and macro nutrition tracking. It allows a single user per deployment to maintain a health profile, browse and filter recipes, manage a pantry inventory, build a shopping list, and log daily meals against calculated calorie and macro targets. All data is persisted locally in SQLite; no cloud services, accounts, or authentication are required.
+SwiftPantry is a single-user ASP.NET Razor Pages web application for personal meal prep planning and macro nutrition tracking. It allows a single user per deployment to maintain a health profile, browse and filter recipes, manage a pantry inventory, build a shopping list, and log daily meals against calculated calorie and macro targets. All data is persisted locally in SQLite; no cloud services, accounts, or authentication are required.
 
 ---
 
