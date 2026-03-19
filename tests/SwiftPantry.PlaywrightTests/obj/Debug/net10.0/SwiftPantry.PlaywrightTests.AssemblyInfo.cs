@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SwiftPantry.PlaywrightTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+53f73e6bb23ca3133d4e30530de4c140fe35a435")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d306c0e0b8865e16ee7d7ba4cd92a215f4159c50")]
 [assembly: System.Reflection.AssemblyProductAttribute("SwiftPantry.PlaywrightTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SwiftPantry.PlaywrightTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

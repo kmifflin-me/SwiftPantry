@@ -30,8 +30,8 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--sp-bg);
-  color: var(--sp-text);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
   margin-bottom: 60px;
 }
 
@@ -73,7 +73,6 @@ body {
 h2 {
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: var(--sp-text);
 }
 
 h5 {
@@ -82,26 +81,22 @@ h5 {
 
 /* ── Cards ── */
 .card {
-  border: 1px solid var(--sp-border);
+  border: 1px solid var(--bs-border-color);
   border-radius: var(--sp-radius);
   box-shadow: var(--sp-card-shadow);
-  background: #fff;
 }
 
 .card-header {
-  background-color: #fff;
-  border-bottom: 1px solid var(--sp-border);
+  border-bottom: 1px solid var(--bs-border-color);
   font-weight: 600;
   font-size: 0.875rem;
   letter-spacing: 0.01em;
   padding: 0.9rem 1.25rem;
   border-radius: var(--sp-radius) var(--sp-radius) 0 0 !important;
-  color: var(--sp-text);
 }
 
 .card-footer {
-  background-color: #fafbfa;
-  border-top: 1px solid var(--sp-border);
+  border-top: 1px solid var(--bs-border-color);
   border-radius: 0 0 var(--sp-radius) var(--sp-radius) !important;
 }
 
@@ -287,12 +282,194 @@ h5 {
 }
 
 .modal-header {
-  border-bottom: 1px solid var(--sp-border);
+  border-bottom: 1px solid var(--bs-border-color);
   padding: 1rem 1.25rem;
 }
 
 .modal-footer {
-  border-top: 1px solid var(--sp-border);
+  border-top: 1px solid var(--bs-border-color);
+}
+
+/* ── Dark mode toggle button (in navbar) ── */
+.btn-dark-toggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .3);
+  color: rgba(255, 255, 255, .85);
+  padding: 0.3rem 0.55rem;
+  line-height: 1;
+  border-radius: var(--sp-radius-sm);
+  display: flex;
+  align-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-dark-toggle:hover {
+  background: rgba(255, 255, 255, .15);
+  color: #fff;
+}
+
+/* ── LLM generation overlay ── */
+#llm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+}
+
+#llm-overlay.active {
+  display: flex;
+}
+
+.llm-overlay-card {
+  background: #fff;
+  border-radius: var(--sp-radius);
+  padding: 2.5rem 3rem;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .25);
+  max-width: 380px;
+  width: 90%;
+}
+
+.llm-spinner {
+  width: 52px;
+  height: 52px;
+  border: 4px solid var(--sp-green-light);
+  border-top-color: var(--sp-green);
+  border-radius: 50%;
+  animation: llm-spin 0.9s linear infinite;
+  margin: 0 auto 1.25rem;
+}
+
+@keyframes llm-spin {
+  to { transform: rotate(360deg); }
+}
+
+.llm-overlay-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--bs-body-color);
+  margin-bottom: 0.4rem;
+}
+
+.llm-overlay-dots::after {
+  content: '';
+  animation: llm-dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes llm-dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+.llm-overlay-sub {
+  font-size: 0.8125rem;
+  color: var(--sp-text-muted);
+  margin-bottom: 0;
+}
+
+/* ── Light mode card cap colours (explicit so they match card bg) ── */
+.card-header { background-color: var(--bs-card-cap-bg, #fff); }
+.card-footer { background-color: var(--bs-card-cap-bg, #fafbfa); }
+
+/* ── Dark mode ──
+   Bootstrap 5.3 handles all base dark styling via data-bs-theme="dark".
+   These rules only add brand-specific tweaks on top.
+── */
+html[data-bs-theme="dark"] {
+  /* Tune Bootstrap's dark palette toward our brand green */
+  --bs-body-bg:           #111812;
+  --bs-body-color:        #dde8df;
+  --bs-secondary-color:   #7a9e84;
+  --bs-emphasis-color:    #f0f4f1;
+  --bs-tertiary-bg:       #1a2419;
+  --bs-secondary-bg:      #1e2c20;
+  --bs-border-color:      rgba(255, 255, 255, .1);
+  --bs-card-bg:           #18231a;
+  --bs-card-cap-bg:       #18231a;
+  --sp-green-light:       rgba(42, 125, 79, .2);
+  --sp-card-shadow:       0 1px 3px rgba(0,0,0,.5), 0 6px 20px rgba(0,0,0,.35);
+}
+
+/* Keep brand green for primary buttons */
+html[data-bs-theme="dark"] .btn-primary {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+}
+
+html[data-bs-theme="dark"] .btn-primary:hover,
+html[data-bs-theme="dark"] .btn-primary:focus {
+  background-color: var(--sp-green-dark);
+  border-color: var(--sp-green-dark);
+}
+
+html[data-bs-theme="dark"] .btn-outline-primary {
+  color: #7dd4a0;
+  border-color: var(--sp-green);
+}
+
+html[data-bs-theme="dark"] .btn-outline-primary:hover {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+  color: #fff;
+}
+
+html[data-bs-theme="dark"] .btn-outline-success {
+  color: #7dd4a0;
+  border-color: var(--sp-green);
+}
+
+html[data-bs-theme="dark"] .btn-outline-success:hover {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+  color: #fff;
+}
+
+/* Progress bar brand colors */
+html[data-bs-theme="dark"] .progress-bar.bg-success { background-color: var(--sp-green) !important; }
+html[data-bs-theme="dark"] .progress-bar.bg-warning { background-color: var(--sp-amber) !important; }
+
+/* Badge */
+html[data-bs-theme="dark"] .badge.bg-secondary {
+  background-color: #243026 !important;
+  color: #9dc4a8;
+}
+
+/* Category header */
+html[data-bs-theme="dark"] .category-header {
+  background-color: rgba(42, 125, 79, .15) !important;
+  color: #7dd4a0;
+  border-bottom-color: rgba(42, 125, 79, .2);
+}
+
+/* Ingredient owned */
+html[data-bs-theme="dark"] .ingredient-owned {
+  color: #7dd4a0;
+}
+
+/* LLM overlay card */
+html[data-bs-theme="dark"] .llm-overlay-card {
+  background-color: #1a2419;
+  color: #dde8df;
+}
+
+/* list-group hover — re-apply brand green tint */
+html[data-bs-theme="dark"] .list-group-item-action:hover,
+html[data-bs-theme="dark"] .list-group-item-action:focus {
+  background-color: rgba(42, 125, 79, .18);
+  color: #7dd4a0;
+}
+
+/* Form select — green tinted dropdown arrow */
+html[data-bs-theme="dark"] .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237a9e84' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
 }
 
 /* ── Form floating placeholder fix (original scaffold) ── */

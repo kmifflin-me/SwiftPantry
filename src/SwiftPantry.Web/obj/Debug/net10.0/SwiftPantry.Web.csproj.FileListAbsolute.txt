@@ -212,5 +212,6 @@ C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net1
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.pdb
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.genruntimeconfig.cache
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\ref\SwiftPantry.Web.dll
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-6xz1mr6s8o-6xz1mr6s8o.gz
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-wxp0ymt0qm-wxp0ymt0qm.gz
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-6qdy6mvg76-6qdy6mvg76.gz
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-hlbrka7wy3-hlbrka7wy3.gz

@@ -153,16 +153,26 @@
     }
 </div>
 
+<!-- LLM generation overlay -->
+<div id="llm-overlay" role="status" aria-live="polite" aria-label="Generating recipe">
+    <div class="llm-overlay-card">
+        <div class="llm-spinner"></div>
+        <div class="llm-overlay-title">✨ AI is crafting your recipe<span class="llm-overlay-dots"></span></div>
+        <p class="llm-overlay-sub">Talking to Gemini — this usually takes 5–10 seconds</p>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        // Generate Recipe button — disable + show spinner on click to indicate loading (3-10s API call)
+        // Generate Recipe button — show overlay on submit
         (function () {
-            var form = document.getElementById('generateRecipeForm');
-            var btn  = document.getElementById('generateRecipeBtn');
-            if (form && btn) {
+            var form    = document.getElementById('generateRecipeForm');
+            var btn     = document.getElementById('generateRecipeBtn');
+            var overlay = document.getElementById('llm-overlay');
+            if (form && btn && overlay) {
                 form.addEventListener('submit', function () {
                     btn.disabled = true;
-                    btn.textContent = 'Generating... ⏳';
+                    overlay.classList.add('active');
                 });
             }
         })();
