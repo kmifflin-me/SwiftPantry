@@ -139,9 +139,7 @@ C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net1
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\scopedcss\Pages\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\scopedcss\bundle\SwiftPantry.Web.styles.css
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\scopedcss\projectbundle\SwiftPantry.Web.bundle.scp.css
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-b9sayid5wm-b9sayid5wm.gz
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\hcvoyc0t5k-{0}-61n19gt1b8-61n19gt1b8.gz
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\b08bch81tx-{0}-bqjiyaj88i-bqjiyaj88i.gz
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\sa24037nwa-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\sa14rglqft-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -214,3 +212,5 @@ C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net1
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.pdb
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.genruntimeconfig.cache
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\ref\SwiftPantry.Web.dll
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-eqde996x2v-eqde996x2v.gz
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-nn4607h18f-nn4607h18f.gz

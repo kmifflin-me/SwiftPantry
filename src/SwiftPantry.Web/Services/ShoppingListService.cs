@@ -107,7 +107,7 @@ public class ShoppingListService(AppDbContext db, IPantryService pantryService) 
     {
         if (defaultServings <= 0) return quantity;
 
-        var match = Regex.Match(quantity.Trim(), @"^(\d+\.?\d*)\s*(.*)$");
+        var match = Regex.Match(quantity.Trim(), @"^(\d+\.?\d*)\s+(.+)$");
         if (!match.Success) return quantity;
 
         if (!decimal.TryParse(match.Groups[1].Value, out var num)) return quantity;

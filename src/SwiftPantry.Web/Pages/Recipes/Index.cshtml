@@ -1,6 +1,168 @@
 @page
 @model SwiftPantry.Web.Pages.Recipes.IndexModel
 @{
-    ViewData["Title"] = "Recipes Index";
+    ViewData["Title"] = "Browse Recipes";
+
+    string MealTypeActive(string mt) =>
+        Model.MealTypes.Any(m => m.Equals(mt, StringComparison.OrdinalIgnoreCase))
+            ? "btn-primary" : "btn-outline-primary";
 }
-<!-- TODO: Implement Recipes/Index page markup per UX_FLOWS.md -->
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="mb-0">Browse Recipes</h2>
+        </div>
+        <div class="col-auto text-muted mt-1">
+            <small>@Model.Recipes.Count recipe@(Model.Recipes.Count == 1 ? "" : "s")</small>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card mb-4" data-testid="recipe-filter-bar">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <!-- Meal Type toggles -->
+                <div class="col-md-5">
+                    <label class="form-label d-block">Meal Type</label>
+                    <div class="btn-group flex-wrap" role="group" data-testid="meal-type-filter">
+                        @foreach (var mt in new[] { "breakfast", "lunch", "dinner", "snack" })
+                        {
+                            <a href="#"
+                               class="btn btn-sm @MealTypeActive(mt) meal-type-toggle"
+                               data-meal-type="@mt"
+                               data-testid="meal-type-filter-@mt">
+                                @(char.ToUpper(mt[0]) + mt[1..])
+                            </a>
+                        }
+                    </div>
+                    @foreach (var mt in Model.MealTypes)
+                    {
+                        <input type="hidden" name="mealTypes" value="@mt" class="meal-type-hidden" />
+                    }
+                </div>
+                <!-- Max Prep Time -->
+                <div class="col-md-3">
+                    <label class="form-label" for="maxPrep">Max Prep (min)</label>
+                    <input id="maxPrep" name="maxPrep" type="number" class="form-control"
+                           min="5" max="240" step="5"
+                           value="@Model.MaxPrep"
+                           placeholder="Any"
+                           data-testid="max-prep-filter" />
+                </div>
+                <!-- Min Ownership % -->
+                <div class="col-md-2">
+                    <label class="form-label" for="minOwn">Min I Have (%)</label>
+                    <input id="minOwn" name="minOwn" type="number" class="form-control"
+                           min="0" max="100" step="10"
+                           value="@Model.MinOwn"
+                           placeholder="Any"
+                           data-testid="min-ownership-filter" />
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary flex-grow-1" type="submit"
+                            data-testid="apply-filter-button">Filter</button>
+                    <a class="btn btn-outline-secondary" asp-page="/Recipes/Index"
+                       data-testid="clear-filter-button">✕</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recipe Cards -->
+    @if (!Model.Recipes.Any())
+    {
+        <div class="text-center py-5 text-muted" data-testid="no-recipes-message">
+            <p class="mb-2">No recipes match your filters.</p>
+            <a class="btn btn-outline-primary" asp-page="/Recipes/Index">Clear Filters</a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" data-testid="recipe-list">
+            @foreach (var vm in Model.Recipes)
+            {
+                var r = vm.Recipe;
+                <div class="col" data-testid="recipe-card-@r.Id">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-page="/Recipes/Detail" asp-route-id="@r.Id"
+                                   data-testid="recipe-name-link-@r.Id">@r.Name</a>
+                            </h5>
+                            <p class="card-text text-muted small mb-2">@r.Description</p>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                @foreach (var mt in r.MealTypeList)
+                                {
+                                    <span class="badge bg-secondary">@(char.ToUpper(mt[0]) + mt[1..])</span>
+                                }
+                            </div>
+                            <div class="small text-muted">
+                                <span>@r.PrepTimeMinutes min</span>
+                                <span class="mx-1">·</span>
+                                <span>@r.CaloriesPerServing kcal/serving</span>
+                                <span class="mx-1">·</span>
+                                <span data-testid="recipe-card-ownership-@r.Id"
+                                      class="@(vm.OwnershipPct >= 80 ? "ingredient-owned" : "")">
+                                    @vm.OwnershipPct% owned
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary flex-grow-1"
+                               asp-page="/Recipes/Detail" asp-route-id="@r.Id"
+                               data-testid="view-recipe-button-@r.Id">View</a>
+                            <form method="post" asp-page-handler="Save" asp-route-recipeId="@r.Id">
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        type="submit"
+                                        data-testid="save-recipe-button-@r.Id">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Meal-type toggle buttons
+        (function () {
+            var hidden = document.querySelectorAll('.meal-type-hidden');
+            var active = Array.from(hidden).map(function (h) { return h.value.toLowerCase(); });
+
+            document.querySelectorAll('.meal-type-toggle').forEach(function (btn) {
+                var mt = btn.dataset.mealType.toLowerCase();
+                if (active.includes(mt)) {
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                }
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var idx = active.indexOf(mt);
+                    if (idx >= 0) {
+                        active.splice(idx, 1);
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-primary');
+                    } else {
+                        active.push(mt);
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                    }
+                    // Rebuild hidden inputs
+                    document.querySelectorAll('.meal-type-hidden').forEach(function (h) { h.remove(); });
+                    var form = btn.closest('form');
+                    active.forEach(function (m) {
+                        var inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'mealTypes';
+                        inp.value = m;
+                        inp.className = 'meal-type-hidden';
+                        form.appendChild(inp);
+                    });
+                });
+            });
+        })();
+    </script>
+}

@@ -11,9 +11,9 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 public class DataPersistenceTests : PageTest
 {
     private static readonly PlaywrightFixture Fixture = new();
-    private DashboardPage  _dashboardPage  = null!;
-    private PantryPage     _pantryPage     = null!;
-    private ProfilePage    _profilePage    = null!;
+    private DashboardPage _dashboardPage = null!;
+    private PantryPage    _pantryPage    = null!;
+    private ProfilePage   _profilePage   = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp() => Fixture.CreateClient();
@@ -30,22 +30,45 @@ public class DataPersistenceTests : PageTest
     [Test]
     public async Task PantryItem_PersistedAfterReload()
     {
-        // TODO: AddItemAsync, reload page, assert HasItemAsync
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 8");
+        await _pantryPage.GotoAsync();
+        await _pantryPage.AddItemAsync("quinoa", "500g", "Grains");
+        await Page.WaitForURLAsync("**/Pantry**");
+
+        // Reload
+        await _pantryPage.GotoAsync();
+        Assert.That(await _pantryPage.HasItemAsync("quinoa"), Is.True);
     }
 
     [Test]
     public async Task MealLogEntry_PersistedAfterReload()
     {
-        // TODO: Fixture meal entry should still be present after GotoAsync twice
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 8");
+        // Fixture has Overnight Oats in today's meal log
+        await _dashboardPage.GotoAsync();
+        var listText = await Page.Locator("[data-testid='todays-meals-list']").InnerTextAsync();
+        Assert.That(listText, Does.Contain("Overnight Oats"));
+
+        // Reload
+        await _dashboardPage.GotoAsync();
+        listText = await Page.Locator("[data-testid='todays-meals-list']").InnerTextAsync();
+        Assert.That(listText, Does.Contain("Overnight Oats"));
     }
 
     [Test]
     public async Task ProfileEdit_PersistedAfterNavigation()
     {
-        // TODO: Edit profile, navigate away, return to /Profile, assert updated values
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 8");
+        // Edit profile to change goal to LoseWeight
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Profile/Edit");
+        await Page.SelectOptionAsync("[data-testid='goal-select']", "LoseWeight");
+        await Page.ClickAsync("[data-testid='save-profile-button']");
+        await Page.WaitForURLAsync("**/Profile**");
+
+        // Navigate away and come back
+        await _dashboardPage.GotoAsync();
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Profile");
+
+        var targetText = await _profilePage.GetCalorieTargetTextAsync();
+        // LoseWeight = 2763 - 500 = 2263
+        Assert.That(targetText, Does.Contain("2,263").Or.Contain("2263"));
     }
 
     [OneTimeTearDown]

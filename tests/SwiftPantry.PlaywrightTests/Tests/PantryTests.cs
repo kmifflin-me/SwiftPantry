@@ -25,29 +25,50 @@ public class PantryTests : PageTest
     [Test]
     public async Task Pantry_ShowsFixtureItems_OnLoad()
     {
-        // TODO: GotoAsync, assert GetItemCountAsync() == 5
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 5");
+        await _pantryPage.GotoAsync();
+        // Fixture seeds 5 pantry items; each item has view row + edit row,
+        // but we count only the view rows via data-testid="pantry-item-{id}"
+        var count = await _pantryPage.GetItemCountAsync();
+        Assert.That(count, Is.GreaterThanOrEqualTo(5));
     }
 
     [Test]
     public async Task AddPantryItem_AppearsInList()
     {
-        // TODO: AddItemAsync("broccoli", "1 head", "Produce"), assert HasItemAsync("broccoli")
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 5");
+        await _pantryPage.GotoAsync();
+        await _pantryPage.AddItemAsync("broccoli", "1 head", "Produce");
+        await Page.WaitForURLAsync("**/Pantry**");
+        Assert.That(await _pantryPage.HasItemAsync("broccoli"), Is.True);
     }
 
     [Test]
     public async Task DeletePantryItem_RemovesFromList()
     {
-        // TODO: DeleteItemAsync on a fixture item id, assert it is gone
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 5");
+        await _pantryPage.GotoAsync();
+
+        // Find the first pantry-item id from the DOM
+        var firstItem = Page.Locator("[data-testid^='pantry-item-']").First;
+        var testId = await firstItem.GetAttributeAsync("data-testid");
+        var id = int.Parse(testId!.Replace("pantry-item-", ""));
+
+        await _pantryPage.DeleteItemAsync(id);
+        await Page.WaitForURLAsync("**/Pantry**");
+
+        var itemLocator = Page.Locator($"[data-testid='pantry-item-{id}']");
+        Assert.That(await itemLocator.CountAsync(), Is.EqualTo(0));
     }
 
     [Test]
     public async Task Pantry_ShowsEmptyState_WhenNoItems()
     {
-        // TODO: Delete all fixture items, assert IsEmptyStateVisibleAsync()
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 5");
+        // Remove all pantry items via DB
+        using var scope = Fixture.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.PantryItems.RemoveRange(db.PantryItems.ToList());
+        await db.SaveChangesAsync();
+
+        await _pantryPage.GotoAsync();
+        Assert.That(await _pantryPage.IsEmptyStateVisibleAsync(), Is.True);
     }
 
     [OneTimeTearDown]

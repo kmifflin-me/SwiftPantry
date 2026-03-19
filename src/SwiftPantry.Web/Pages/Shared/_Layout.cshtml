@@ -1,52 +1,85 @@
-﻿<!DOCTYPE html>
+@inject SwiftPantry.Web.Services.IProfileService ProfileService
+@{
+    bool hideNavbar = ViewData["HideNavbar"] as bool? ?? false;
+    bool profileExists = hideNavbar ? true : await ProfileService.ProfileExistsAsync();
+    var currentPath = Context.Request.Path.Value ?? "";
+
+    string NavClass(string path) =>
+        currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SwiftPantry.Web</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - SwiftPantry</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SwiftPantry.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    @if (!hideNavbar && profileExists)
+    {
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" data-testid="main-navbar">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">SwiftPantry.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold" asp-page="/MealLog">SwiftPantry</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="@NavClass("/MealLog")" asp-page="/MealLog" data-testid="nav-meallog">Meal Log</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="@NavClass("/Recipes")" asp-page="/Recipes/Index" data-testid="nav-recipes">Recipes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@NavClass("/Pantry")" asp-page="/Pantry" data-testid="nav-pantry">Pantry</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@NavClass("/ShoppingList")" asp-page="/ShoppingList" data-testid="nav-shoppinglist">Shopping</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@NavClass("/SavedRecipes")" asp-page="/SavedRecipes" data-testid="nav-savedrecipes">Saved</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@NavClass("/Profile")" asp-page="/Profile/Index" data-testid="nav-profile">Profile</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    }
+
+    <div class="@((!hideNavbar && profileExists) ? "main-content" : "")">
+        @if (TempData["Success"] is string successMsg)
+        {
+            <div class="container-fluid px-0">
+                <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                    @successMsg
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] is string errorMsg)
+        {
+            <div class="container-fluid px-0">
+                <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                    @errorMsg
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        <main role="main" class="pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - SwiftPantry.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

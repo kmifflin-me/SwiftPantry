@@ -1,6 +1,371 @@
 @page
 @model SwiftPantry.Web.Pages.MealLogModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
-    ViewData["Title"] = "MealLog";
+    ViewData["Title"] = "Meal Log";
+    var summary = Model.Summary;
+    var today   = Model.Today;
+    var sel     = Model.SelectedDate;
+
+    string ProgressColor(bool isOver, string normalClass) => isOver ? "bg-danger" : normalClass;
+
+    string FormatDate(DateOnly d) => d == today
+        ? "Today"
+        : d.ToString("dddd, MMMM d, yyyy");
 }
-<!-- TODO: Implement MealLog page markup per UX_FLOWS.md -->
+
+@* Anti-forgery token for AJAX (shopping list mark-purchased uses this) *@
+<input type="hidden" id="af-token" name="__RequestVerificationToken"
+       value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
+
+<div class="container mt-4">
+    <!-- Header + Date Picker -->
+    <div class="row align-items-center mb-3">
+        <div class="col-md-8">
+            <h2 class="mb-0">Meal Log</h2>
+        </div>
+        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+            <form method="get" action="/MealLog" class="d-flex gap-2 justify-content-md-end align-items-center">
+                <label class="form-label mb-0" for="date">Date:</label>
+                <input id="date" name="date" type="date"
+                       class="form-control"
+                       value="@sel.ToString("yyyy-MM-dd")"
+                       max="@today.ToString("yyyy-MM-dd")"
+                       min="@today.AddDays(-6).ToString("yyyy-MM-dd")"
+                       style="width:160px"
+                       data-testid="date-picker" />
+                <button class="btn btn-outline-secondary" type="submit">Go</button>
+            </form>
+        </div>
+    </div>
+
+    <h5 class="text-muted">@FormatDate(sel)</h5>
+
+    @if (summary is not null)
+    {
+        <!-- Daily Progress Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Daily Nutrition Progress</div>
+                    <div class="card-body">
+                        <!-- Calories -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>Calories</strong></span>
+                                <span data-testid="calorie-progress-label">
+                                    @summary.CaloriesConsumed.ToString("N0") / @summary.CaloriesTarget.ToString("N0") kcal
+                                </span>
+                            </div>
+                            <div class="progress" style="height:20px">
+                                <div class="progress-bar @ProgressColor(summary.CaloriesOver, "bg-success")"
+                                     role="progressbar"
+                                     style="width:@summary.CaloriesPct%"
+                                     aria-valuenow="@summary.CaloriesConsumed"
+                                     aria-valuemin="0"
+                                     aria-valuemax="@summary.CaloriesTarget"
+                                     data-testid="calorie-progress-bar"></div>
+                            </div>
+                        </div>
+                        <!-- Protein -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>Protein</strong></span>
+                                <span data-testid="protein-progress-label">
+                                    @summary.ProteinConsumed / @summary.ProteinTarget g
+                                </span>
+                            </div>
+                            <div class="progress" style="height:14px">
+                                <div class="progress-bar @ProgressColor(summary.ProteinOver, "bg-info")"
+                                     role="progressbar"
+                                     style="width:@summary.ProteinPct%"
+                                     data-testid="protein-progress-bar"></div>
+                            </div>
+                        </div>
+                        <!-- Carbs -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>Carbs</strong></span>
+                                <span data-testid="carbs-progress-label">
+                                    @summary.CarbsConsumed / @summary.CarbsTarget g
+                                </span>
+                            </div>
+                            <div class="progress" style="height:14px">
+                                <div class="progress-bar @ProgressColor(summary.CarbsOver, "bg-warning")"
+                                     role="progressbar"
+                                     style="width:@summary.CarbsPct%"
+                                     data-testid="carbs-progress-bar"></div>
+                            </div>
+                        </div>
+                        <!-- Fat -->
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>Fat</strong></span>
+                                <span data-testid="fat-progress-label">
+                                    @summary.FatConsumed / @summary.FatTarget g
+                                </span>
+                            </div>
+                            <div class="progress" style="height:14px">
+                                <div class="progress-bar @ProgressColor(summary.FatOver, "bg-secondary")"
+                                     role="progressbar"
+                                     style="width:@summary.FatPct%"
+                                     data-testid="fat-progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Left: Today's Entries + Manual Log -->
+        <div class="col-lg-8">
+
+            <!-- Today's Meals -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Today's Meals</span>
+                    <small class="text-muted">
+                        @Model.Entries.Count entries
+                        · @Model.Entries.Sum(e => e.TotalCalories).ToString("N0") kcal
+                    </small>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Entries.Any())
+                    {
+                        <div class="text-center py-5 text-muted" data-testid="no-entries-state">
+                            <p class="mb-2">No meals logged today. Browse recipes to get started!</p>
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Recipes/Index">Browse Recipes</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush" data-testid="todays-meals-list">
+                            @foreach (var entry in Model.Entries)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center"
+                                    data-testid="meal-entry-@entry.Id">
+                                    <div>
+                                        <strong>@entry.RecipeName</strong><br />
+                                        <span class="badge bg-secondary me-1">@entry.MealType</span>
+                                        <small class="text-muted">
+                                            @entry.Servings serving(s)
+                                            · @entry.LoggedAt.ToLocalTime().ToString("HH:mm")
+                                        </small>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="fw-semibold" data-testid="entry-calories-@entry.Id">@entry.TotalCalories.ToString("N0") kcal</span>
+                                        <span class="text-muted small" data-testid="entry-protein-@entry.Id">@entry.TotalProteinG g P</span>
+                                        <span class="text-muted small" data-testid="entry-carbs-@entry.Id">@entry.TotalCarbsG g C</span>
+                                        <span class="text-muted small" data-testid="entry-fat-@entry.Id">@entry.TotalFatG g F</span>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@entry.Id"
+                                              asp-route-date="@sel.ToString("yyyy-MM-dd")">
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Delete \'@entry.RecipeName\'?')"
+                                                    data-testid="delete-entry-@entry.Id">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            <!-- Manual Log Form -->
+            <div class="card">
+                <div class="card-header">Log a Meal Manually</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="LogManual">
+                        <div asp-validation-summary="None" class="text-danger mb-2"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Recipe / Meal Name</label>
+                                <input class="form-control @(ViewData.ModelState["NewEntry.RecipeName"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                       name="NewEntry.RecipeName" required maxlength="200"
+                                       placeholder="e.g. Chicken and Rice"
+                                       value="@Model.NewEntry.RecipeName"
+                                       data-testid="manual-meal-name" />
+                                <div class="invalid-feedback">Name is required.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Meal Type</label>
+                                <select class="form-select @(ViewData.ModelState["NewEntry.MealType"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                        name="NewEntry.MealType" required
+                                        data-testid="manual-meal-type">
+                                    <option value="" disabled selected="@(string.IsNullOrEmpty(Model.NewEntry.MealType))">— Select —</option>
+                                    <option value="Breakfast" selected="@(Model.NewEntry.MealType == "Breakfast")">Breakfast</option>
+                                    <option value="Lunch"     selected="@(Model.NewEntry.MealType == "Lunch")">Lunch</option>
+                                    <option value="Dinner"    selected="@(Model.NewEntry.MealType == "Dinner")">Dinner</option>
+                                    <option value="Snack"     selected="@(Model.NewEntry.MealType == "Snack")">Snack</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a meal type.</div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-6 col-md-2">
+                                <label class="form-label">Servings</label>
+                                <input class="form-control" type="number"
+                                       name="NewEntry.Servings"
+                                       min="0.25" max="20" step="0.25" required
+                                       value="@(Model.NewEntry.Servings > 0 ? Model.NewEntry.Servings.ToString() : "1")"
+                                       data-testid="manual-servings" />
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <label class="form-label">Calories</label>
+                                <input class="form-control" type="number"
+                                       name="NewEntry.CaloriesPerServing"
+                                       min="0" required placeholder="kcal"
+                                       value="@(Model.NewEntry.CaloriesPerServing)"
+                                       data-testid="manual-calories" />
+                            </div>
+                            <div class="col-4 col-md-3">
+                                <label class="form-label">Protein (g)</label>
+                                <input class="form-control" type="number"
+                                       name="NewEntry.ProteinPerServing"
+                                       min="0" step="0.1" required
+                                       value="@(Model.NewEntry.ProteinPerServing)"
+                                       data-testid="manual-protein" />
+                            </div>
+                            <div class="col-4 col-md-3">
+                                <label class="form-label">Carbs (g)</label>
+                                <input class="form-control" type="number"
+                                       name="NewEntry.CarbsPerServing"
+                                       min="0" step="0.1" required
+                                       value="@(Model.NewEntry.CarbsPerServing)"
+                                       data-testid="manual-carbs" />
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <label class="form-label">Fat (g)</label>
+                                <input class="form-control" type="number"
+                                       name="NewEntry.FatPerServing"
+                                       min="0" step="0.1" required
+                                       value="@(Model.NewEntry.FatPerServing)"
+                                       data-testid="manual-fat" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <button class="btn btn-primary" type="submit"
+                                        data-testid="manual-submit">Log Meal</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Quick Log + Quick Actions -->
+        <div class="col-lg-4">
+
+            <!-- Quick Log -->
+            <div class="card mb-4" data-testid="quick-log-section">
+                <div class="card-header">Quick Log</div>
+                <div class="card-body p-0">
+                    @if (!Model.SavedRecipes.Any())
+                    {
+                        <div class="text-center py-4 px-3 text-muted">
+                            <p class="mb-2">No saved recipes yet.</p>
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Recipes/Index">Browse Recipes</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var sr in Model.SavedRecipes)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center"
+                                    data-testid="quick-log-item-@sr.Recipe.Id">
+                                    <div>
+                                        <div class="fw-semibold">@sr.Recipe.Name</div>
+                                        <small class="text-muted">@sr.Recipe.CaloriesPerServing kcal/serving</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#quickLogModal"
+                                            data-recipe-id="@sr.Recipe.Id"
+                                            data-recipe-name="@sr.Recipe.Name"
+                                            data-default-servings="@sr.Recipe.DefaultServings"
+                                            data-meal-type="@Model.DefaultMealType"
+                                            data-testid="quick-log-button-@sr.Recipe.Id">
+                                        Log
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">Quick Actions</div>
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-action" asp-page="/Recipes/Index">Browse Recipes →</a>
+                    <a class="list-group-item list-group-item-action" asp-page="/Pantry">My Pantry →</a>
+                    <a class="list-group-item list-group-item-action" asp-page="/ShoppingList">Shopping List →</a>
+                    <a class="list-group-item list-group-item-action" asp-page="/SavedRecipes">Saved Recipes →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Log Modal -->
+<div id="quickLogModal" class="modal fade" tabindex="-1"
+     aria-labelledby="quickLogModalLabel" aria-hidden="true"
+     data-testid="log-meal-modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickLogModalLabel">Log Recipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickLogForm" method="post" asp-page-handler="LogRecipe">
+                    <input type="hidden" name="RecipeId" id="qlRecipeId" />
+                    <input type="hidden" name="qlRecipeName" id="qlRecipeName" />
+                    <div class="mb-3">
+                        <label class="form-label">Servings</label>
+                        <input id="qlServings" class="form-control" type="number"
+                               name="Servings" min="0.25" max="20" step="0.25" required
+                               data-testid="log-modal-servings" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Meal Type</label>
+                        <select id="qlMealType" class="form-select" name="MealType" required
+                                data-testid="log-modal-meal-type">
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="quickLogForm" class="btn btn-primary"
+                        data-testid="log-modal-confirm">Confirm Log</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set default meal type on modal open based on current server-side default
+        document.addEventListener('DOMContentLoaded', function () {
+            var defaultMealType = '@Model.DefaultMealType';
+            var typeEl = document.getElementById('qlMealType');
+            if (typeEl && defaultMealType) {
+                typeEl.value = defaultMealType;
+            }
+        });
+    </script>
+}

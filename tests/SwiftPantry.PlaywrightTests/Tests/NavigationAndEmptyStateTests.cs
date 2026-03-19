@@ -24,36 +24,43 @@ public class NavigationAndEmptyStateTests : PageTest
     [Test]
     public async Task NavLink_Pantry_NavigatesToPantryPage()
     {
-        // TODO: Click nav link, assert URL contains /Pantry
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 9");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/MealLog");
+        await Page.ClickAsync("[data-testid='nav-pantry']");
+        await Page.WaitForURLAsync("**/Pantry**");
+        Assert.That(Page.Url, Does.Contain("/Pantry"));
     }
 
     [Test]
     public async Task NavLink_Recipes_NavigatesToRecipeBrowser()
     {
-        // TODO: Click nav link, assert URL contains /Recipes
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 9");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/MealLog");
+        await Page.ClickAsync("[data-testid='nav-recipes']");
+        await Page.WaitForURLAsync("**/Recipes**");
+        Assert.That(Page.Url, Does.Contain("/Recipes"));
     }
 
     [Test]
     public async Task NavLink_ShoppingList_NavigatesToShoppingList()
     {
-        // TODO: Click nav link, assert URL contains /ShoppingList
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 9");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/MealLog");
+        await Page.ClickAsync("[data-testid='nav-shoppinglist']");
+        await Page.WaitForURLAsync("**/ShoppingList**");
+        Assert.That(Page.Url, Does.Contain("/ShoppingList"));
     }
 
     [Test]
     public async Task RecipeDetail_Returns404_ForUnknownId()
     {
-        // TODO: Navigate to /Recipes/Detail?id=9999, assert HTTP 404 or error page
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 9");
+        var response = await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Recipes/Detail/9999");
+        Assert.That(response?.Status, Is.EqualTo(404));
     }
 
     [Test]
     public async Task SavedRecipes_ShowsEmptyState_Initially()
     {
-        // TODO: Navigate to /SavedRecipes, assert empty-state element visible
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 9");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/SavedRecipes");
+        var emptyState = Page.Locator("[data-testid='saved-recipes-empty-state']");
+        Assert.That(await emptyState.IsVisibleAsync(), Is.True);
     }
 
     [OneTimeTearDown]

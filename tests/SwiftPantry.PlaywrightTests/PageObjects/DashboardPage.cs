@@ -18,15 +18,41 @@ public class DashboardPage(IPage page, string baseUrl)
     public async Task LogMealManuallyAsync(string recipeName, string mealType,
         decimal servings, int calories, decimal protein, decimal carbs, decimal fat)
     {
-        // TODO: Implement using data-testid locators
-        throw new NotImplementedException("TODO: Implement LogMealManuallyAsync");
+        await page.FillAsync("[data-testid='manual-meal-name']", recipeName);
+        await page.SelectOptionAsync("[data-testid='manual-meal-type']", mealType);
+        await page.FillAsync("[data-testid='manual-servings']", servings.ToString());
+        await page.FillAsync("[data-testid='manual-calories']", calories.ToString());
+        await page.FillAsync("[data-testid='manual-protein']", protein.ToString());
+        await page.FillAsync("[data-testid='manual-carbs']", carbs.ToString());
+        await page.FillAsync("[data-testid='manual-fat']", fat.ToString());
+        await page.ClickAsync("[data-testid='manual-submit']");
     }
 
     /// <summary>Reads the four progress bar labels and returns a MacroSummary.</summary>
     public async Task<MacroSummary> GetDailyMacroSummaryAsync()
     {
-        // TODO: Implement by reading data-testid="calorie-progress-label" etc.
-        throw new NotImplementedException("TODO: Implement GetDailyMacroSummaryAsync");
+        var calText  = await page.Locator("[data-testid='calorie-progress-label']").InnerTextAsync();
+        var protText = await page.Locator("[data-testid='protein-progress-label']").InnerTextAsync();
+        var carbText = await page.Locator("[data-testid='carbs-progress-label']").InnerTextAsync();
+        var fatText  = await page.Locator("[data-testid='fat-progress-label']").InnerTextAsync();
+
+        // Parse "X / Y kcal" or "X / Y g"
+        static (int consumed, int target) ParseLabel(string text)
+        {
+            var parts = text.Split('/');
+            var consumed = int.Parse(new string(parts[0].Trim().Where(char.IsDigit).ToArray()));
+            var targetStr = new string(parts[1].Trim().TakeWhile(c => char.IsDigit(c) || c == ',').ToArray())
+                .Replace(",", "");
+            var target = int.Parse(targetStr);
+            return (consumed, target);
+        }
+
+        var (calC, calT)  = ParseLabel(calText);
+        var (protC, protT) = ParseLabel(protText);
+        var (carbC, carbT) = ParseLabel(carbText);
+        var (fatC, fatT)   = ParseLabel(fatText);
+
+        return new MacroSummary(calC, calT, protC, protT, carbC, carbT, fatC, fatT);
     }
 
     // ─── Assertions ────────────────────────────────────────────────────────

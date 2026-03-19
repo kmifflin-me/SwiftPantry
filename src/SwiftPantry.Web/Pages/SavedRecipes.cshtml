@@ -1,6 +1,140 @@
 @page
 @model SwiftPantry.Web.Pages.SavedRecipesModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
-    ViewData["Title"] = "SavedRecipes";
+    ViewData["Title"] = "Saved Recipes";
 }
-<!-- TODO: Implement SavedRecipes page markup per UX_FLOWS.md -->
+
+<div class="container mt-4">
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2 class="mb-0">Saved Recipes</h2>
+        </div>
+        <div class="col-auto text-muted mt-1">
+            <small>@Model.SavedRecipes.Count saved</small>
+        </div>
+    </div>
+
+    @if (!Model.SavedRecipes.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted" data-testid="saved-recipes-empty-state">
+                <p class="mb-2">No saved recipes yet. Browse recipes and save your favorites!</p>
+                <a class="btn btn-outline-primary" asp-page="/Recipes/Index">Browse Recipes</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" data-testid="saved-recipes-list">
+            @foreach (var sr in Model.SavedRecipes)
+            {
+                var r = sr.Recipe;
+                var own = Model.OwnershipByRecipeId.GetValueOrDefault(sr.RecipeId, 0);
+                <div class="col" data-testid="saved-recipe-card-@sr.Id">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-page="/Recipes/Detail" asp-route-id="@r.Id"
+                                   data-testid="saved-recipe-name-@sr.Id">@r.Name</a>
+                            </h5>
+                            <p class="card-text text-muted small mb-2">@r.Description</p>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                @foreach (var mt in r.MealTypeList)
+                                {
+                                    <span class="badge bg-secondary">@(char.ToUpper(mt[0]) + mt[1..])</span>
+                                }
+                            </div>
+                            <div class="small text-muted">
+                                <span>@r.PrepTimeMinutes min</span>
+                                <span class="mx-1">·</span>
+                                <span>@r.CaloriesPerServing kcal/serving</span>
+                                <span class="mx-1">·</span>
+                                <span class="@(own >= 80 ? "ingredient-owned" : "")">@own% owned</span>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary flex-grow-1"
+                               asp-page="/Recipes/Detail" asp-route-id="@r.Id"
+                               data-testid="view-saved-recipe-button-@sr.Id">View</a>
+                            <button class="btn btn-sm btn-success"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#quickLogModal"
+                                    data-recipe-id="@r.Id"
+                                    data-recipe-name="@r.Name"
+                                    data-default-servings="@r.DefaultServings"
+                                    data-testid="quick-log-button-@sr.Id">Quick Log</button>
+                            <form method="post" asp-page-handler="Unsave" asp-route-savedRecipeId="@sr.Id">
+                                <button class="btn btn-sm btn-outline-danger" type="submit"
+                                        onclick="return confirm('Remove this recipe from saved?')"
+                                        data-testid="unsave-recipe-button-@sr.Id">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Quick Log Modal -->
+<div id="quickLogModal" class="modal fade" tabindex="-1"
+     aria-labelledby="quickLogModalLabel" aria-hidden="true"
+     data-testid="log-meal-modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickLogModalLabel">Log Recipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickLogForm" method="post" asp-page-handler="LogRecipe">
+                    <input type="hidden" name="RecipeId" id="qlRecipeId" />
+                    <input type="hidden" name="qlRecipeName" id="qlRecipeName" />
+                    <div class="mb-3">
+                        <label class="form-label">Servings</label>
+                        <input id="qlServings" class="form-control" type="number"
+                               name="Servings" min="0.25" max="20" step="0.25" required
+                               data-testid="log-modal-servings" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Meal Type</label>
+                        <select id="qlMealType" class="form-select" name="MealType" required
+                                data-testid="log-modal-meal-type">
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="quickLogForm" class="btn btn-primary"
+                        data-testid="log-modal-confirm">Confirm Log</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var modal = document.getElementById('quickLogModal');
+            if (!modal) return;
+            modal.addEventListener('show.bs.modal', function (event) {
+                var btn = event.relatedTarget;
+                if (!btn) return;
+                var idField   = document.getElementById('qlRecipeId');
+                var srvField  = document.getElementById('qlServings');
+                var nameField = document.getElementById('qlRecipeName');
+                if (idField)   idField.value   = btn.getAttribute('data-recipe-id');
+                if (srvField)  srvField.value  = btn.getAttribute('data-default-servings');
+                if (nameField) nameField.value = btn.getAttribute('data-recipe-name');
+                var titleEl = document.getElementById('quickLogModalLabel');
+                if (titleEl) titleEl.textContent = 'Log \u2014 ' + btn.getAttribute('data-recipe-name');
+            });
+        })();
+    </script>
+}

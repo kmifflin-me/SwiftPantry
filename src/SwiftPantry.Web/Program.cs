@@ -8,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Razor Pages
 builder.Services.AddRazorPages();
 
+// Allow AJAX to pass the anti-forgery token via a request header
+builder.Services.AddAntiforgery(options =>
+    options.HeaderName = "RequestVerificationToken");
+
 // EF Core + SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

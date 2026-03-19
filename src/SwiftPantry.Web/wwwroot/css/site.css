@@ -1,3 +1,40 @@
+/* ── SwiftPantry custom styles ── */
+
+/* Offset for fixed-top navbar */
+.main-content {
+    padding-top: 70px;
+}
+
+/* Pantry / Shopping inline edit form — hidden by default */
+.pantry-edit-form {
+    display: none;
+}
+
+/* Purchased shopping list items */
+.shopping-item-purchased .item-name {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+/* Ingredient owned indicator */
+.ingredient-owned {
+    color: #198754;
+}
+
+/* Category header */
+.category-header {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.25rem;
+    margin-top: 1rem;
+}
+
+/* ── Original scaffold styles ── */
+
 html {
   font-size: 14px;
 }

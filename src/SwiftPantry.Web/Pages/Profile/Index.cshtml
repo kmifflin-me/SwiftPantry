@@ -1,6 +1,92 @@
 @page
 @model SwiftPantry.Web.Pages.Profile.IndexModel
 @{
-    ViewData["Title"] = "Profile Index";
+    ViewData["Title"] = "My Profile";
+    var p = Model.Profile;
+
+    string ActivityDisplay(string val) => val switch {
+        "Sedentary"        => "Sedentary",
+        "LightlyActive"    => "Lightly Active",
+        "ModeratelyActive" => "Moderately Active",
+        "VeryActive"       => "Very Active",
+        "ExtraActive"      => "Extra Active",
+        _                  => val
+    };
+
+    string GoalDisplay(string val) => val switch {
+        "LoseWeight" => "Lose Weight",
+        "Maintain"   => "Maintain",
+        "GainWeight" => "Gain Weight",
+        _            => val
+    };
 }
-<!-- TODO: Implement Profile/Index page markup per UX_FLOWS.md -->
+
+<div class="container mt-4">
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2>My Health Profile</h2>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-outline-primary" asp-page="/Profile/Edit">Edit Profile</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile details -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Profile Details</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Age</dt>
+                        <dd class="col-sm-7">@p.Age</dd>
+                        <dt class="col-sm-5">Sex</dt>
+                        <dd class="col-sm-7">@p.Sex</dd>
+                        <dt class="col-sm-5">Height</dt>
+                        <dd class="col-sm-7">@p.DisplayHeight @p.HeightUnit</dd>
+                        <dt class="col-sm-5">Weight</dt>
+                        <dd class="col-sm-7">@p.DisplayWeight @p.WeightUnit</dd>
+                        <dt class="col-sm-5">Activity Level</dt>
+                        <dd class="col-sm-7">@ActivityDisplay(p.ActivityLevel)</dd>
+                        <dt class="col-sm-5">Goal</dt>
+                        <dd class="col-sm-7">@GoalDisplay(p.Goal)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculated targets -->
+        <div class="col-md-6">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white">Calculated Daily Targets</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-6">TDEE</dt>
+                        <dd class="col-sm-6" data-testid="tdee-display">@p.Tdee.ToString("N0") kcal</dd>
+                        <dt class="col-sm-6">Daily Target</dt>
+                        <dd class="col-sm-6">
+                            <strong data-testid="calorie-target">@p.CalorieTarget.ToString("N0") kcal</strong>
+                        </dd>
+                        <dt class="col-sm-6">Protein</dt>
+                        <dd class="col-sm-6" data-testid="protein-target">@p.ProteinTargetG g</dd>
+                        <dt class="col-sm-6">Carbohydrates</dt>
+                        <dd class="col-sm-6" data-testid="carbs-target">@p.CarbsTargetG g</dd>
+                        <dt class="col-sm-6">Fat</dt>
+                        <dd class="col-sm-6" data-testid="fat-target">@p.FatTargetG g</dd>
+                    </dl>
+                    <hr />
+                    <small class="text-muted">
+                        Targets calculated using the Mifflin-St Jeor equation.
+                        These are estimates — not medical advice.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <a class="btn btn-link" asp-page="/MealLog">← Back to Meal Log</a>
+        </div>
+    </div>
+</div>

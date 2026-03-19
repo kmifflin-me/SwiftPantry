@@ -1,4 +1,5 @@
 using SwiftPantry.PlaywrightTests.PageObjects;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SwiftPantry.PlaywrightTests.Tests;
 
@@ -27,30 +28,82 @@ public class ShoppingListTests : PageTest
     [Test]
     public async Task ShoppingList_ShowsEmptyState_Initially()
     {
-        // TODO: GotoAsync, assert IsEmptyStateVisibleAsync()
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 6");
+        await _shoppingListPage.GotoAsync();
+        Assert.That(await _shoppingListPage.IsEmptyStateVisibleAsync(), Is.True);
     }
 
     [Test]
     public async Task MoveToPantry_AddsItemToPantry()
     {
-        // TODO: Seed a shopping list item, MoveToPantryAsync, navigate to /Pantry,
-        // assert HasItemAsync for the moved ingredient
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 6");
+        // Seed a shopping list item directly and mark it purchased
+        int itemId;
+        using (var scope = Fixture.Services.CreateScope())
+        {
+            var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
+            var item = await svc.AddItemAsync(new ShoppingListItem
+            {
+                Name = "spinach", Quantity = "2 cups", Category = "Produce"
+            });
+            await svc.MarkPurchasedAsync(item.Id);
+            itemId = item.Id;
+        }
+
+        await _shoppingListPage.GotoAsync();
+        await _shoppingListPage.MoveToPantryAsync(itemId);
+
+        await _pantryPage.GotoAsync();
+        Assert.That(await _pantryPage.HasItemAsync("spinach"), Is.True);
     }
 
     [Test]
     public async Task MoveToPantry_RemovesItemFromShoppingList()
     {
-        // TODO: MoveToPantryAsync, assert item no longer in shopping list
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 6");
+        int itemId;
+        using (var scope = Fixture.Services.CreateScope())
+        {
+            var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
+            var item = await svc.AddItemAsync(new ShoppingListItem
+            {
+                Name = "garlic", Quantity = "3 cloves", Category = "Produce"
+            });
+            await svc.MarkPurchasedAsync(item.Id);
+            itemId = item.Id;
+        }
+
+        await _shoppingListPage.GotoAsync();
+        await _shoppingListPage.MoveToPantryAsync(itemId);
+        await _shoppingListPage.GotoAsync();
+
+        var itemLocator = Page.Locator($"[data-testid='shopping-item-{itemId}']");
+        Assert.That(await itemLocator.CountAsync(), Is.EqualTo(0));
     }
 
     [Test]
-    public async Task ClearChecked_RemovesOnlyCheckedItems()
+    public async Task ClearChecked_RemovesOnlyPurchasedItems()
     {
-        // TODO: Check some items, ClearCheckedAsync, assert unchecked items remain
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 6");
+        int unpurchasedId;
+        using (var scope = Fixture.Services.CreateScope())
+        {
+            var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
+            var keep = await svc.AddItemAsync(new ShoppingListItem
+            {
+                Name = "milk", Quantity = "1 gallon", Category = "Dairy"
+            });
+            var remove = await svc.AddItemAsync(new ShoppingListItem
+            {
+                Name = "butter", Quantity = "1 stick", Category = "Dairy"
+            });
+            await svc.MarkPurchasedAsync(remove.Id);
+            unpurchasedId = keep.Id;
+        }
+
+        await _shoppingListPage.GotoAsync();
+        await _shoppingListPage.ClearCheckedAsync();
+        await Page.WaitForURLAsync("**/ShoppingList**");
+
+        // The unpurchased item should still be present
+        var keepLocator = Page.Locator($"[data-testid='shopping-item-{unpurchasedId}']");
+        Assert.That(await keepLocator.CountAsync(), Is.EqualTo(1));
     }
 
     [OneTimeTearDown]

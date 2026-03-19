@@ -1,6 +1,192 @@
-@page
+@page "{id:int}"
 @model SwiftPantry.Web.Pages.Recipes.DetailModel
+@using SwiftPantry.Web.Models
 @{
-    ViewData["Title"] = "Recipes Detail";
+    ViewData["Title"] = Model.Recipe.Name;
+    var r = Model.Recipe;
 }
-<!-- TODO: Implement Recipes/Detail page markup per UX_FLOWS.md -->
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Recipes/Index">Recipes</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@r.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Left: Recipe Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4" data-testid="recipe-detail-card">
+                <div class="card-body">
+                    <h2 class="card-title mb-1" data-testid="recipe-title">@r.Name</h2>
+                    <p class="text-muted mb-3" data-testid="recipe-detail-description">@r.Description</p>
+
+                    <!-- Meta row -->
+                    <div class="d-flex flex-wrap gap-3 mb-4 small">
+                        <span><strong>Prep:</strong> @r.PrepTimeMinutes min</span>
+                        <span><strong>Servings:</strong>
+                            <span id="currentServings" data-testid="current-servings">@r.DefaultServings</span>
+                        </span>
+                        <span>
+                            @foreach (var mt in r.MealTypeList)
+                            {
+                                <span class="badge bg-secondary me-1">@(char.ToUpper(mt[0]) + mt[1..])</span>
+                            }
+                        </span>
+                        <span data-testid="ownership-badge">@Model.OwnershipPct% ingredients owned</span>
+                    </div>
+
+                    <!-- Serving scaler -->
+                    <div class="mb-4 d-flex align-items-center gap-3">
+                        <label class="form-label mb-0 fw-semibold" for="servingsInput">Adjust Servings:</label>
+                        <input id="servingsInput" type="number"
+                               class="form-control"
+                               style="width: 90px"
+                               min="0.25" max="20" step="0.25"
+                               value="@r.DefaultServings"
+                               data-default-servings="@r.DefaultServings"
+                               data-testid="servings-input" />
+                    </div>
+
+                    <!-- Nutrition summary -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body py-2">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div class="fw-bold" id="totalCalories"
+                                         data-base-calories="@r.CaloriesPerServing"
+                                         data-testid="detail-total-calories">@r.CaloriesPerServing</div>
+                                    <small class="text-muted">kcal</small>
+                                </div>
+                                <div class="col">
+                                    <div class="fw-bold" id="totalProtein"
+                                         data-base-protein="@r.ProteinPerServing"
+                                         data-testid="detail-total-protein">@r.ProteinPerServing</div>
+                                    <small class="text-muted">Protein (g)</small>
+                                </div>
+                                <div class="col">
+                                    <div class="fw-bold" id="totalCarbs"
+                                         data-base-carbs="@r.CarbsPerServing"
+                                         data-testid="detail-total-carbs">@r.CarbsPerServing</div>
+                                    <small class="text-muted">Carbs (g)</small>
+                                </div>
+                                <div class="col">
+                                    <div class="fw-bold" id="totalFat"
+                                         data-base-fat="@r.FatPerServing"
+                                         data-testid="detail-total-fat">@r.FatPerServing</div>
+                                    <small class="text-muted">Fat (g)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ingredients -->
+                    <h5 class="mb-2">Ingredients</h5>
+                    <ul class="list-group list-group-flush mb-4" data-testid="recipe-ingredient-list">
+                        @foreach (var ing in r.Ingredients.OrderBy(i => i.Name))
+                        {
+                            var owned = Model.PantryNamesLower.Contains(ing.Name.Trim().ToLower());
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0"
+                                data-testid="ingredient-@ing.Id">
+                                <span class="@(owned ? "ingredient-owned" : "")">@ing.Name</span>
+                                <span class="text-muted" data-original-qty="@ing.Quantity">@ing.Quantity</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Instructions -->
+                    @if (r.InstructionList.Any())
+                    {
+                        <h5 class="mb-2">Instructions</h5>
+                        <ol class="ps-3" data-testid="recipe-instructions">
+                            @foreach (var step in r.InstructionList)
+                            {
+                                <li class="mb-2">@step</li>
+                            }
+                        </ol>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="col-lg-4">
+            <!-- Save / Unsave -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    @if (Model.SavedRecipe is null)
+                    {
+                        <form method="post" asp-page-handler="Save" asp-route-id="@r.Id">
+                            <button class="btn btn-outline-primary w-100" type="submit"
+                                    data-testid="save-recipe-button">Save Recipe</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Unsave"
+                              asp-route-savedRecipeId="@Model.SavedRecipe.Id"
+                              asp-route-recipeId="@r.Id">
+                            <button class="btn btn-primary w-100" type="submit"
+                                    data-testid="unsave-recipe-button">✓ Saved — Remove</button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <!-- Log to Meal Log -->
+            <div class="card mb-3">
+                <div class="card-header">Log to Meal Log</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="Log" asp-route-id="@r.Id">
+                        <input type="hidden" name="servings" class="servings-sync" value="@r.DefaultServings" />
+                        <div class="mb-3">
+                            <label class="form-label">Meal Type</label>
+                            <select class="form-select" name="mealType" data-testid="detail-meal-type-select">
+                                <option value="Breakfast" selected="@(Model.DefaultMealType == "Breakfast")">Breakfast</option>
+                                <option value="Lunch"     selected="@(Model.DefaultMealType == "Lunch")">Lunch</option>
+                                <option value="Dinner"    selected="@(Model.DefaultMealType == "Dinner")">Dinner</option>
+                                <option value="Snack"     selected="@(Model.DefaultMealType == "Snack")">Snack</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success w-100" type="submit"
+                                data-testid="log-recipe-button">Log Meal</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Add Missing to Shopping List -->
+            <div class="card">
+                <div class="card-header">Shopping List</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        Adds ingredients you don't have in your pantry to your shopping list.
+                    </p>
+                    <form method="post" asp-page-handler="AddMissing" asp-route-id="@r.Id">
+                        <input type="hidden" name="servings" class="servings-sync" value="@r.DefaultServings" />
+                        <button class="btn btn-outline-secondary w-100" type="submit"
+                                data-testid="add-to-shopping-list-button">Add Missing to Shopping List</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Keep currentServings display in sync with the servings input
+        // (site.js handles ingredient scaling, macro scaling, and servings-sync form fields)
+        (function () {
+            var input = document.getElementById('servingsInput');
+            if (!input) return;
+            function syncDisplay() {
+                var el = document.getElementById('currentServings');
+                if (el) el.textContent = input.value;
+            }
+            input.addEventListener('input', syncDisplay);
+            input.addEventListener('change', syncDisplay);
+        })();
+    </script>
+}

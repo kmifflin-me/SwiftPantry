@@ -51,13 +51,14 @@ public class MacroCalculatorService : IMacroCalculatorService
         var (proteinPct, carbsPct, fatPct) = MacroSplits.TryGetValue(goal, out var split)
             ? split : (0.30, 0.40, 0.30);
 
-        int proteinG = (int)Math.Round(adjustedCalories * proteinPct / 4.0);
-        int carbsG   = (int)Math.Round(adjustedCalories * carbsPct  / 4.0);
-        int fatG     = (int)Math.Round(adjustedCalories * fatPct    / 9.0);
+        int calorieTarget = (int)Math.Round(adjustedCalories);
+        int proteinG = (int)Math.Round(calorieTarget * proteinPct / 4.0);
+        int carbsG   = (int)Math.Round(calorieTarget * carbsPct  / 4.0);
+        int fatG     = (int)Math.Round(calorieTarget * fatPct    / 9.0);
 
         return new MacroTargets(
             Tdee:          (int)Math.Round(tdee),
-            CalorieTarget: (int)Math.Round(adjustedCalories),
+            CalorieTarget: calorieTarget,
             ProteinG:      proteinG,
             CarbsG:        carbsG,
             FatG:          fatG

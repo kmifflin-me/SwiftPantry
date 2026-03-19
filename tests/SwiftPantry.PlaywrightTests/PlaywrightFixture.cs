@@ -105,4 +105,20 @@ public class PlaywrightFixture : WebApplicationFactory<Program>
 
         await db.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Removes the UserProfile from the test database so the app redirects
+    /// to /Profile/Setup (simulates first-time user).
+    /// </summary>
+    public async Task DeleteProfileAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var profile = await db.UserProfiles.FirstOrDefaultAsync();
+        if (profile is not null)
+        {
+            db.UserProfiles.Remove(profile);
+            await db.SaveChangesAsync();
+        }
+    }
 }

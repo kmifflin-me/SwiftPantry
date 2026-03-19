@@ -1,6 +1,182 @@
 @page
 @model SwiftPantry.Web.Pages.PantryModel
+@using SwiftPantry.Web.Models
 @{
-    ViewData["Title"] = "Pantry";
+    ViewData["Title"] = "My Pantry";
+
+    var grouped = CategoryOrder.Ordered
+        .Select(cat => new {
+            Key     = cat,
+            Display = CategoryOrder.DisplayNames[cat],
+            Items   = Model.Items.Where(i => i.Category == cat).OrderBy(i => i.Name).ToList()
+        })
+        .Where(g => g.Items.Count > 0)
+        .ToList();
 }
-<!-- TODO: Implement Pantry page markup per UX_FLOWS.md -->
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="mb-0">My Pantry</h2>
+        </div>
+        <div class="col-auto text-muted mt-1">
+            <small>@Model.Items.Count item@(Model.Items.Count == 1 ? "" : "s")</small>
+        </div>
+    </div>
+
+    <!-- Add Ingredient Form -->
+    <div class="card mb-4">
+        <div class="card-header">Add Ingredient</div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Add">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Name</label>
+                        <input class="form-control @(ViewData.ModelState["NewItem.Name"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               name="NewItem.Name"
+                               maxlength="200" required
+                               placeholder="e.g. Chicken Breast"
+                               value="@Model.NewItem.Name"
+                               data-testid="add-item-name" />
+                        <div class="invalid-feedback">
+                            @(ViewData.ModelState["NewItem.Name"]?.Errors.FirstOrDefault()?.ErrorMessage)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quantity</label>
+                        <input class="form-control @(ViewData.ModelState["NewItem.Quantity"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               name="NewItem.Quantity"
+                               maxlength="100" required
+                               placeholder="e.g. 2 lbs"
+                               value="@Model.NewItem.Quantity"
+                               data-testid="add-item-quantity" />
+                        <div class="invalid-feedback">
+                            @(ViewData.ModelState["NewItem.Quantity"]?.Errors.FirstOrDefault()?.ErrorMessage)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <select class="form-select @(ViewData.ModelState["NewItem.Category"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                name="NewItem.Category"
+                                required
+                                data-testid="add-item-category">
+                            <option value="" disabled selected="@(string.IsNullOrEmpty(Model.NewItem.Category))">— Select —</option>
+                            @foreach (var cat in CategoryOrder.Ordered)
+                            {
+                                <option value="@cat" selected="@(Model.NewItem.Category == cat)">
+                                    @CategoryOrder.DisplayNames[cat]
+                                </option>
+                            }
+                        </select>
+                        <div class="invalid-feedback">
+                            @(ViewData.ModelState["NewItem.Category"]?.Errors.FirstOrDefault()?.ErrorMessage)
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" type="submit"
+                                data-testid="add-item-submit">Add Item</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pantry Items -->
+    @if (!Model.Items.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted" data-testid="pantry-empty-state">
+                <p class="mb-2">Your pantry is empty.</p>
+                <p class="mb-0"><small>Add ingredients above to track what you have on hand.</small></p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var group in grouped)
+        {
+            <div class="card mb-3">
+                <div class="card-header category-header fw-semibold"
+                     data-testid="category-header-@group.Key">
+                    @group.Display
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach (var item in group.Items)
+                    {
+                        <!-- View row -->
+                        <div class="list-group-item" id="pantry-view-@item.Id"
+                             data-testid="pantry-item-@item.Id">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-semibold">@item.Name</span>
+                                    <span class="text-muted ms-2">@item.Quantity</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="showPantryEdit(@item.Id)"
+                                            data-testid="edit-item-@item.Id">
+                                        Edit
+                                    </button>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
+                                          class="d-inline">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Remove \'@item.Name\' from pantry?')"
+                                                data-testid="delete-item-@item.Id">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Inline edit row (hidden by default) -->
+                        <div class="list-group-item pantry-edit-form" id="pantry-edit-form-@item.Id">
+                            <form method="post" asp-page-handler="Edit">
+                                <input type="hidden" name="EditItem.Id" value="@item.Id" />
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label form-label-sm">Name</label>
+                                        <input class="form-control form-control-sm @(ViewData.ModelState["EditItem.Name"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                               name="EditItem.Name"
+                                               maxlength="200" required
+                                               value="@item.Name"
+                                               data-testid="edit-name-@item.Id" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label form-label-sm">Quantity</label>
+                                        <input class="form-control form-control-sm @(ViewData.ModelState["EditItem.Quantity"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                               name="EditItem.Quantity"
+                                               maxlength="100" required
+                                               value="@item.Quantity"
+                                               data-testid="edit-quantity-@item.Id" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label form-label-sm">Category</label>
+                                        <select class="form-select form-select-sm"
+                                                name="EditItem.Category"
+                                                required
+                                                data-testid="edit-category-@item.Id">
+                                            @foreach (var cat in CategoryOrder.Ordered)
+                                            {
+                                                <option value="@cat" selected="@(item.Category == cat)">
+                                                    @CategoryOrder.DisplayNames[cat]
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex gap-1">
+                                        <button class="btn btn-sm btn-primary flex-grow-1" type="submit"
+                                                data-testid="save-item-@item.Id">Save</button>
+                                        <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                onclick="cancelPantryEdit(@item.Id)"
+                                                data-testid="cancel-edit-@item.Id">✕</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

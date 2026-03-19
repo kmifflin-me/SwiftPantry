@@ -14,36 +14,40 @@ public class FirstTimeUserTests : PageTest
     private ProfilePage _profilePage = null!;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient(); // starts the server
+    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        // Clear profile so this tests the first-time flow
         await Fixture.ResetDatabaseAsync();
-        // TODO: delete the UserProfile row so middleware triggers redirect
+        await Fixture.DeleteProfileAsync();
         _profilePage = new ProfilePage(Page, PlaywrightFixture.BaseUrl);
     }
 
     [Test]
     public async Task Redirects_ToProfileSetup_WhenNoProfile()
     {
-        // TODO: Navigate to / and assert URL contains /Profile/Setup
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 1");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/");
+        await Page.WaitForURLAsync("**/Profile/Setup**");
+        Assert.That(Page.Url, Does.Contain("/Profile/Setup"));
     }
 
     [Test]
     public async Task ProfileSetup_SavesProfile_AndRedirectsToDashboard()
     {
-        // TODO: CreateProfileAsync, assert redirect to /MealLog
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 1");
+        // TC-CALC-1: Male, 30, 70 in, 180 lbs, ModeratelyActive, Maintain
+        await _profilePage.CreateProfileAsync(30, "Male", 70, 180, "ModeratelyActive", "Maintain");
+        await Page.WaitForURLAsync("**/MealLog**");
+        Assert.That(Page.Url, Does.Contain("/MealLog").Or.Contain("/Profile"));
     }
 
     [Test]
     public async Task ProfileSetup_DisplaysCalorieTarget_AfterSave()
     {
-        // TODO: Create profile, navigate to /Profile, assert calorie-target text
-        Assert.Inconclusive("TODO: Implement per TEST_PLAN.md Suite 1");
+        await _profilePage.CreateProfileAsync(30, "Male", 70, 180, "ModeratelyActive", "Maintain");
+        await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Profile");
+        var text = await _profilePage.GetCalorieTargetTextAsync();
+        Assert.That(text, Does.Contain("2,763").Or.Contain("2763"));
     }
 
     [OneTimeTearDown]

@@ -1,21 +1,20 @@
 namespace SwiftPantry.PlaywrightTests.PageObjects;
 
 /// <summary>
-/// Page object for /Recipes/Detail?id={id}.
-/// data-testid contract: recipe-title, recipe-meal-types, recipe-servings,
-/// recipe-calories, recipe-macros, recipe-ingredients-list,
-/// recipe-instructions-list, ownership-badge,
+/// Page object for /Recipes/Detail/{id}.
+/// data-testid contract: recipe-title, ownership-badge,
 /// save-recipe-button, unsave-recipe-button,
-/// add-to-shopping-list-button, log-meal-button,
-/// log-servings-input, log-meal-type-select, log-meal-submit-button.
-/// See ARCHITECTURE.md for complete data-testid contract.
+/// add-to-shopping-list-button, log-recipe-button,
+/// servings-input, detail-meal-type-select.
 /// </summary>
 public class RecipeDetailPage(IPage page, string baseUrl)
 {
+    private readonly string _baseUrl = baseUrl;
+
     // ─── Navigation ────────────────────────────────────────────────────────
 
     public async Task GotoAsync(int recipeId)
-        => await page.GotoAsync($"{baseUrl}/Recipes/Detail?id={recipeId}");
+        => await page.GotoAsync($"{_baseUrl}/Recipes/Detail/{recipeId}");
 
     // ─── Actions ───────────────────────────────────────────────────────────
 
@@ -34,8 +33,9 @@ public class RecipeDetailPage(IPage page, string baseUrl)
     /// <summary>Fills the log-meal form and submits it.</summary>
     public async Task LogMealAsync(decimal servings, string mealType)
     {
-        // TODO: Implement using data-testid="log-servings-input", "log-meal-type-select", "log-meal-submit-button"
-        throw new NotImplementedException("TODO: Implement LogMealAsync");
+        await page.FillAsync("[data-testid='servings-input']", servings.ToString());
+        await page.SelectOptionAsync("[data-testid='detail-meal-type-select']", mealType);
+        await page.ClickAsync("[data-testid='log-recipe-button']");
     }
 
     // ─── Assertions ────────────────────────────────────────────────────────
