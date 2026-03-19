@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SwiftPantry.Web/SwiftPantry.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SwiftPantry.PlaywrightTests/SwiftPantry.PlaywrightTests.csproj" />
+    <Project Path="tests/SwiftPantry.Tests/SwiftPantry.Tests.csproj" />
+  </Folder>
+</Solution>
