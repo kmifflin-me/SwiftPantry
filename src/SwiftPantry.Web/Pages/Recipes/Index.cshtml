@@ -16,7 +16,35 @@
         <div class="col-auto text-muted mt-1">
             <small>@Model.Recipes.Count recipe@(Model.Recipes.Count == 1 ? "" : "s")</small>
         </div>
+        @if (Model.IsLlmAvailable)
+        {
+            <div class="col-auto">
+                <form method="post" asp-page-handler="GenerateRecipe" id="generateRecipeForm">
+                    @foreach (var mt in Model.MealTypes)
+                    {
+                        <input type="hidden" name="mealTypes" value="@mt" />
+                    }
+                    @if (Model.MaxPrep.HasValue)
+                    {
+                        <input type="hidden" name="maxPrep" value="@Model.MaxPrep" />
+                    }
+                    <button type="submit" id="generateRecipeBtn"
+                            class="btn btn-outline-primary"
+                            data-testid="generate-recipe-button">
+                        ✨ Generate Recipe
+                    </button>
+                </form>
+            </div>
+        }
     </div>
+
+    @if (TempData["GenerationError"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible" data-testid="generation-error-alert">
+            @TempData["GenerationError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <!-- Filter Bar -->
     <div class="card mb-4" data-testid="recipe-filter-bar">
@@ -127,6 +155,18 @@
 
 @section Scripts {
     <script>
+        // Generate Recipe button — disable + show spinner on click to indicate loading (3-10s API call)
+        (function () {
+            var form = document.getElementById('generateRecipeForm');
+            var btn  = document.getElementById('generateRecipeBtn');
+            if (form && btn) {
+                form.addEventListener('submit', function () {
+                    btn.disabled = true;
+                    btn.textContent = 'Generating... ⏳';
+                });
+            }
+        })();
+
         // Meal-type toggle buttons
         (function () {
             var hidden = document.querySelectorAll('.meal-type-hidden');

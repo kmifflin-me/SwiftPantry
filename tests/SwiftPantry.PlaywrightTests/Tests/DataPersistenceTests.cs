@@ -7,21 +7,18 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: data survives page reload, profile edits persist across navigation,
 /// meal log entries persist across sessions (simulated by full page reload).
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class DataPersistenceTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private DashboardPage _dashboardPage = null!;
     private PantryPage    _pantryPage    = null!;
     private ProfilePage   _profilePage   = null!;
 
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
-
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _dashboardPage = new DashboardPage(Page, PlaywrightFixture.BaseUrl);
         _pantryPage    = new PantryPage(Page, PlaywrightFixture.BaseUrl);
         _profilePage   = new ProfilePage(Page, PlaywrightFixture.BaseUrl);
@@ -70,7 +67,4 @@ public class DataPersistenceTests : PageTest
         // LoseWeight = 2763 - 500 = 2263
         Assert.That(targetText, Does.Contain("2,263").Or.Contain("2263"));
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

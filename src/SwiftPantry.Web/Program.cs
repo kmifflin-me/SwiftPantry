@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SwiftPantry.Web.Configuration;
 using SwiftPantry.Web.Data;
 using SwiftPantry.Web.Middleware;
 using SwiftPantry.Web.Services;
@@ -26,12 +27,15 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 // MacroCalculatorService — singleton (stateless pure math, no DB access)
 builder.Services.AddSingleton<IMacroCalculatorService, MacroCalculatorService>();
 
-// LLM service — registered conditionally based on feature flag
-var enableLlm = builder.Configuration.GetValue<bool>("Features:EnableLlmRecipes");
-if (enableLlm)
-    builder.Services.AddScoped<ILlmRecipeService, LlmRecipeService>();
-else
-    builder.Services.AddScoped<ILlmRecipeService, NoOpLlmRecipeService>();
+// Gemini configuration
+builder.Services.Configure<GeminiOptions>(
+    builder.Configuration.GetSection(GeminiOptions.SectionName));
+
+// LLM service — always registered; feature flag + API key check is inside IsAvailable.
+// The Generate button only renders when IsAvailable = true, so the flag stays respected.
+builder.Services.AddHttpClient<LlmRecipeService>()
+    .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(30));
+builder.Services.AddScoped<ILlmRecipeService, LlmRecipeService>();
 
 var app = builder.Build();
 

@@ -48,7 +48,7 @@ public class RecipeBrowserPage(IPage page, string baseUrl)
 
     /// <summary>Returns the number of recipe cards currently displayed.</summary>
     public async Task<int> GetRecipeCardCountAsync()
-        => await page.Locator("[data-testid^='recipe-card-']").CountAsync();
+        => await page.Locator("[data-testid^='recipe-name-link-']").CountAsync();
 
     /// <summary>Returns the ownership percentage text for the given recipe id.</summary>
     public async Task<string> GetOwnershipTextAsync(int recipeId)

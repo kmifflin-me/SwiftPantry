@@ -7,19 +7,16 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: TC-CALC-1 through TC-CALC-4 calorie calculations,
 /// edit profile flow, unit conversion display.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class ProfileTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private ProfilePage _profilePage = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _profilePage = new ProfilePage(Page, PlaywrightFixture.BaseUrl);
     }
 
@@ -38,7 +35,7 @@ public class ProfileTests : PageTest
     public async Task CalcCalorieTarget_FemaleLoseWeight_ReturnsExpected()
     {
         // Delete fixture profile, create TC-CALC-2 profile
-        await Fixture.DeleteProfileAsync();
+        await TestSetup.Fixture.DeleteProfileAsync();
         // 162.56 cm ≈ 64 in, 58.97 kg ≈ 130 lbs
         await _profilePage.CreateProfileAsync(25, "Female", 64, 130, "LightlyActive", "LoseWeight");
         await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Profile");
@@ -50,7 +47,7 @@ public class ProfileTests : PageTest
     [Test]
     public async Task CalcCalorieTarget_MaleGainWeight_ReturnsExpected()
     {
-        await Fixture.DeleteProfileAsync();
+        await TestSetup.Fixture.DeleteProfileAsync();
         // 182.88 cm ≈ 72 in, 99.79 kg ≈ 220 lbs
         await _profilePage.CreateProfileAsync(45, "Male", 72, 220, "VeryActive", "GainWeight");
         await Page.GotoAsync(PlaywrightFixture.BaseUrl + "/Profile");
@@ -71,7 +68,4 @@ public class ProfileTests : PageTest
         // LoseWeight = 2763 - 500 = 2263
         Assert.That(text, Does.Contain("2,263").Or.Contain("2263"));
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

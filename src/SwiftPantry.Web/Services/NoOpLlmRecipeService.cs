@@ -1,15 +1,15 @@
 using SwiftPantry.Web.Models;
-using SwiftPantry.Web.ViewModels;
 
 namespace SwiftPantry.Web.Services;
 
 /// <summary>
-/// Stub implementation registered when Features:EnableLlmRecipes = false.
-/// All calls throw NotImplementedException.
+/// Stub implementation. IsAvailable always returns false so the Generate button never renders.
+/// Used in tests and when the feature flag is off.
 /// </summary>
 public class NoOpLlmRecipeService : ILlmRecipeService
 {
-    public Task<Recipe> GenerateRecipeAsync(LlmRecipeRequest request)
-        => throw new NotImplementedException(
-            "LLM recipe generation is disabled. Set Features:EnableLlmRecipes = true in appsettings.json.");
+    public bool IsAvailable => false;
+
+    public Task<Recipe?> GenerateRecipeAsync(RecipeGenerationRequest request)
+        => Task.FromResult<Recipe?>(null);
 }

@@ -9,11 +9,11 @@ public class MealLogService(AppDbContext db) : IMealLogService
 {
     public async Task<List<MealLogEntry>> GetEntriesForDateAsync(DateOnly date)
     {
-        // Convert UTC stored times to server local date for comparison
-        return await db.MealLogEntries
-            .Where(e => DateOnly.FromDateTime(e.LoggedAt.ToLocalTime()) == date)
-            .OrderBy(e => e.LoggedAt)
-            .ToListAsync();
+        // Load all entries client-side; EF Core SQLite cannot translate ToLocalTime() to SQL
+        var all = await db.MealLogEntries.OrderBy(e => e.LoggedAt).ToListAsync();
+        // SQLite returns DateTime with Kind=Unspecified; specify Utc so ToLocalTime() converts correctly
+        return all.Where(e => DateOnly.FromDateTime(
+            DateTime.SpecifyKind(e.LoggedAt, DateTimeKind.Utc).ToLocalTime()) == date).ToList();
     }
 
     public async Task<DailySummary> GetDailySummaryAsync(DateOnly date, UserProfile profile)

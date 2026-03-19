@@ -6,19 +6,16 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// TEST_PLAN.md Section C — Suite 5: Pantry Management
 /// Covers: add item, delete item, empty state, category display.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class PantryTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private PantryPage _pantryPage = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _pantryPage = new PantryPage(Page, PlaywrightFixture.BaseUrl);
     }
 
@@ -62,7 +59,7 @@ public class PantryTests : PageTest
     public async Task Pantry_ShowsEmptyState_WhenNoItems()
     {
         // Remove all pantry items via DB
-        using var scope = Fixture.Services.CreateScope();
+        using var scope = TestSetup.Fixture.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.PantryItems.RemoveRange(db.PantryItems.ToList());
         await db.SaveChangesAsync();
@@ -70,7 +67,4 @@ public class PantryTests : PageTest
         await _pantryPage.GotoAsync();
         Assert.That(await _pantryPage.IsEmptyStateVisibleAsync(), Is.True);
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

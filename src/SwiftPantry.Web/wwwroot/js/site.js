@@ -112,16 +112,17 @@ function capitalizeFirst(s) {
     servingsInput.addEventListener('change', updateScaling);
 })();
 
-// ── Shopping list checkbox (mark purchased via fetch) ─────────────────────
+// ── Shopping list checkbox (mark/unmark purchased via fetch) ──────────────
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.shopping-check').forEach(function (checkbox) {
         checkbox.addEventListener('change', function () {
-            if (!this.checked) return;
-            var itemId = this.getAttribute('data-item-id');
-            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            var itemId   = this.getAttribute('data-item-id');
+            var isCheck  = this.checked;
+            var handler  = isCheck ? 'MarkPurchased' : 'UnmarkPurchased';
+            var token    = document.querySelector('input[name="__RequestVerificationToken"]');
             var tokenVal = token ? token.value : '';
 
-            fetch('/ShoppingList?handler=MarkPurchased', {
+            fetch('/ShoppingList?handler=' + handler, {
                 method: 'POST',
                 headers: {
                     'RequestVerificationToken': tokenVal,
@@ -133,23 +134,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (resp.ok) {
                     var li = document.getElementById('shopping-item-' + itemId);
                     if (li) {
-                        li.classList.add('shopping-item-purchased');
-                        var nameEl = li.querySelector('.item-name');
-                        if (nameEl) {
-                            nameEl.style.textDecoration = 'line-through';
-                            nameEl.style.opacity = '0.5';
+                        var nameEl    = li.querySelector('.item-name');
+                        var pantryBtn = li.querySelector('.move-to-pantry-inline');
+                        if (isCheck) {
+                            li.classList.add('shopping-item-purchased');
+                            if (nameEl) { nameEl.style.textDecoration = 'line-through'; nameEl.style.opacity = '0.5'; }
+                            if (pantryBtn) pantryBtn.style.setProperty('display', 'inline', 'important');
+                        } else {
+                            li.classList.remove('shopping-item-purchased');
+                            if (nameEl) { nameEl.style.textDecoration = ''; nameEl.style.opacity = ''; }
+                            if (pantryBtn) pantryBtn.style.setProperty('display', 'none', 'important');
                         }
-                        var addBtn = li.querySelector('.add-to-pantry-btn');
-                        if (addBtn) addBtn.style.display = '';
-                        checkbox.disabled = true;
                     }
                 } else {
-                    checkbox.checked = false;
+                    this.checked = !isCheck;
                 }
-            })
+            }.bind(this))
             .catch(function () {
-                checkbox.checked = false;
-            });
+                this.checked = !isCheck;
+            }.bind(this));
         });
     });
 });

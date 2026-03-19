@@ -73,6 +73,12 @@ public class ShoppingListModel : PageModel
         return new OkResult();
     }
 
+    public async Task<IActionResult> OnPostUnmarkPurchasedAsync(int id)
+    {
+        await _shoppingListService.UnmarkPurchasedAsync(id);
+        return new OkResult();
+    }
+
     public class NewItemInput
     {
         [Required(ErrorMessage = "Name is required.")]

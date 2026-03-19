@@ -40,6 +40,16 @@ public class ShoppingListService(AppDbContext db, IPantryService pantryService) 
         }
     }
 
+    public async Task UnmarkPurchasedAsync(int id)
+    {
+        var item = await db.ShoppingListItems.FindAsync(id);
+        if (item is not null)
+        {
+            item.IsPurchased = false;
+            await db.SaveChangesAsync();
+        }
+    }
+
     public async Task DeleteAllPurchasedAsync()
     {
         var purchased = await db.ShoppingListItems

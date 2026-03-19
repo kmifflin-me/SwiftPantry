@@ -16,6 +16,9 @@ public interface IShoppingListService
     /// <summary>Sets IsPurchased = true for the item with the given ID.</summary>
     Task MarkPurchasedAsync(int id);
 
+    /// <summary>Sets IsPurchased = false for the item with the given ID.</summary>
+    Task UnmarkPurchasedAsync(int id);
+
     /// <summary>Bulk-deletes all items where IsPurchased = true.</summary>
     Task DeleteAllPurchasedAsync();
 

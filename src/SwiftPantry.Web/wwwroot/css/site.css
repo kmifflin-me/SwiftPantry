@@ -1,68 +1,308 @@
 /* ── SwiftPantry custom styles ── */
 
-/* Offset for fixed-top navbar */
-.main-content {
-    padding-top: 70px;
+/* ── Design tokens ── */
+:root {
+  --sp-green:        #2a7d4f;
+  --sp-green-dark:   #1f5e3b;
+  --sp-green-mid:    #3a9562;
+  --sp-green-light:  #eaf5ee;
+  --sp-amber:        #e07e1b;
+  --sp-amber-light:  #fef3e2;
+  --sp-bg:           #f4f6f4;
+  --sp-text:         #162118;
+  --sp-text-muted:   #5a7062;
+  --sp-border:       rgba(0, 0, 0, .08);
+  --sp-card-shadow:  0 1px 3px rgba(0,0,0,.07), 0 6px 20px rgba(0,0,0,.05);
+  --sp-radius:       0.75rem;
+  --sp-radius-sm:    0.5rem;
 }
 
-/* Pantry / Shopping inline edit form — hidden by default */
-.pantry-edit-form {
-    display: none;
-}
-
-/* Purchased shopping list items */
-.shopping-item-purchased .item-name {
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-
-/* Ingredient owned indicator */
-.ingredient-owned {
-    color: #198754;
-}
-
-/* Category header */
-.category-header {
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #6c757d;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 0.25rem;
-    margin-top: 1rem;
-}
-
-/* ── Original scaffold styles ── */
-
+/* ── Base ── */
 html {
   font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
   position: relative;
   min-height: 100%;
 }
 
+@media (min-width: 768px) {
+  html { font-size: 16px; }
+}
+
 body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--sp-bg);
+  color: var(--sp-text);
   margin-bottom: 60px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+/* ── Offset for fixed-top navbar ── */
+.main-content {
+  padding-top: 70px;
+}
+
+/* ── Navbar ── */
+.navbar.bg-brand {
+  background: linear-gradient(135deg, var(--sp-green-dark) 0%, var(--sp-green-mid) 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+
+.navbar.bg-brand .navbar-brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.navbar.bg-brand .nav-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--sp-radius-sm);
+  transition: background 0.15s ease;
+}
+
+.navbar.bg-brand .nav-link:hover {
+  background: rgba(255, 255, 255, .15);
+}
+
+.navbar.bg-brand .nav-link.active {
+  background: rgba(255, 255, 255, .2);
+  font-weight: 600;
+}
+
+/* ── Page headings ── */
+h2 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--sp-text);
+}
+
+h5 {
+  font-weight: 600;
+}
+
+/* ── Cards ── */
+.card {
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius);
+  box-shadow: var(--sp-card-shadow);
+  background: #fff;
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid var(--sp-border);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--sp-radius) var(--sp-radius) 0 0 !important;
+  color: var(--sp-text);
+}
+
+.card-footer {
+  background-color: #fafbfa;
+  border-top: 1px solid var(--sp-border);
+  border-radius: 0 0 var(--sp-radius) var(--sp-radius) !important;
+}
+
+/* ── Buttons ── */
+.btn {
+  border-radius: var(--sp-radius-sm);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--sp-green-dark);
+  border-color: var(--sp-green-dark);
+}
+
+.btn-outline-primary {
+  color: var(--sp-green);
+  border-color: var(--sp-green);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+  color: #fff;
+}
+
+.btn-outline-success {
+  color: var(--sp-green);
+  border-color: var(--sp-green);
+}
+
+.btn-outline-success:hover {
+  background-color: var(--sp-green);
+  border-color: var(--sp-green);
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.15rem rgba(42, 125, 79, .3);
+}
+
+/* ── Form controls ── */
+.form-control,
+.form-select {
+  border-radius: var(--sp-radius-sm);
+  border-color: #cdd6cf;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--sp-green);
+  box-shadow: 0 0 0 0.15rem rgba(42, 125, 79, .2);
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5247;
+  margin-bottom: 0.35rem;
+}
+
+/* ── Progress bars ── */
+.progress {
+  border-radius: 1rem;
+  background-color: #dde8e0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  border-radius: 1rem;
+  transition: width 0.5s ease;
+}
+
+.progress-bar.bg-success { background-color: var(--sp-green) !important; }
+.progress-bar.bg-info    { background-color: #3b9ddd !important; }
+.progress-bar.bg-warning { background-color: var(--sp-amber) !important; }
+.progress-bar.bg-secondary { background-color: #8da898 !important; }
+.progress-bar.bg-danger  { background-color: #d94f4f !important; }
+
+/* ── Badges ── */
+.badge {
+  border-radius: 0.4rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  padding: 0.3em 0.6em;
+  letter-spacing: 0.01em;
+}
+
+.badge.bg-secondary {
+  background-color: #dde8e1 !important;
+  color: #2d5040;
+}
+
+/* ── List group ── */
+.list-group-item {
+  border-color: rgba(0, 0, 0, .06);
+  padding: 0.85rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.list-group-item:first-child {
+  border-top: none;
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-color: var(--sp-green-light);
+  color: var(--sp-green-dark);
+}
+
+/* ── Category header ── */
+.category-header {
+  text-transform: uppercase;
+  font-size: 0.695rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sp-green-dark);
+  background-color: var(--sp-green-light) !important;
+  border-bottom: 1px solid rgba(42, 125, 79, .15);
+  padding: 0.6rem 1.25rem !important;
+  border-radius: 0 !important;
+}
+
+/* ── Alerts ── */
+.alert-success {
+  background-color: var(--sp-green-light);
+  border-color: rgba(42, 125, 79, .3);
+  color: var(--sp-green-dark);
+}
+
+.alert-danger {
+  background-color: #fdecea;
+  border-color: rgba(211, 47, 47, .25);
+  color: #9b2323;
+}
+
+/* ── Text muted override ── */
+.text-muted {
+  color: var(--sp-text-muted) !important;
+}
+
+/* ── Ingredient owned indicator ── */
+.ingredient-owned {
+  color: var(--sp-green);
+  font-weight: 500;
+}
+
+/* ── Pantry / Shopping inline edit form — hidden by default ── */
+.pantry-edit-form {
+  display: none;
+}
+
+/* ── Purchased shopping list items ── */
+.shopping-item-purchased .item-name {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* ── Empty states ── */
+.text-center.py-5.text-muted p {
+  font-size: 0.9375rem;
+}
+
+/* ── Modal ── */
+.modal-content {
+  border: none;
+  border-radius: var(--sp-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .18);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--sp-border);
+  padding: 1rem 1.25rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--sp-border);
+}
+
+/* ── Form floating placeholder fix (original scaffold) ── */
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
   text-align: start;
 }

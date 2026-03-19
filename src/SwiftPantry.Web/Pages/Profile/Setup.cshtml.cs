@@ -78,7 +78,7 @@ public class SetupModel : PageModel
         await _profileService.CreateProfileAsync(profile);
 
         TempData["Success"] = "Profile created! Here are your targets.";
-        return RedirectToPage("/Profile/Index");
+        return RedirectToPage("/MealLog");
     }
 
     private void ValidateHeightWeight()

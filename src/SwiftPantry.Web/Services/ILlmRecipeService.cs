@@ -1,14 +1,17 @@
 using SwiftPantry.Web.Models;
-using SwiftPantry.Web.ViewModels;
 
 namespace SwiftPantry.Web.Services;
 
 public interface ILlmRecipeService
 {
     /// <summary>
-    /// Generates a recipe using an external LLM API.
-    /// The stub implementation (NoOpLlmRecipeService) throws NotImplementedException.
-    /// Only active when Features:EnableLlmRecipes = true in appsettings.json.
+    /// Generates a recipe using the LLM based on user context and filters.
+    /// Returns null if generation fails or the feature is disabled.
     /// </summary>
-    Task<Recipe> GenerateRecipeAsync(LlmRecipeRequest request);
+    Task<Recipe?> GenerateRecipeAsync(RecipeGenerationRequest request);
+
+    /// <summary>
+    /// Returns true if the feature flag is enabled AND an API key is configured.
+    /// </summary>
+    bool IsAvailable { get; }
 }

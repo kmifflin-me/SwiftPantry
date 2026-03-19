@@ -7,20 +7,17 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: log meal from recipe detail, log meal manually from dashboard,
 /// macro progress bar updates, calorie over-target indicator.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class MealLoggingTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private MealLogPage      _mealLogPage      = null!;
     private RecipeDetailPage _recipeDetailPage = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _mealLogPage      = new MealLogPage(Page, PlaywrightFixture.BaseUrl);
         _recipeDetailPage = new RecipeDetailPage(Page, PlaywrightFixture.BaseUrl);
     }
@@ -75,7 +72,4 @@ public class MealLoggingTests : PageTest
 
         Assert.That(await _mealLogPage.IsCaloriesOverTargetAsync(), Is.True);
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

@@ -7,20 +7,17 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// TEST_PLAN.md Section C — Suite 6: Shopping List Management
 /// Covers: check/uncheck items, move to pantry, delete item, clear checked, empty state.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class ShoppingListTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private ShoppingListPage _shoppingListPage = null!;
     private PantryPage       _pantryPage       = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _shoppingListPage = new ShoppingListPage(Page, PlaywrightFixture.BaseUrl);
         _pantryPage       = new PantryPage(Page, PlaywrightFixture.BaseUrl);
     }
@@ -37,7 +34,7 @@ public class ShoppingListTests : PageTest
     {
         // Seed a shopping list item directly and mark it purchased
         int itemId;
-        using (var scope = Fixture.Services.CreateScope())
+        using (var scope = TestSetup.Fixture.Services.CreateScope())
         {
             var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
             var item = await svc.AddItemAsync(new ShoppingListItem
@@ -59,7 +56,7 @@ public class ShoppingListTests : PageTest
     public async Task MoveToPantry_RemovesItemFromShoppingList()
     {
         int itemId;
-        using (var scope = Fixture.Services.CreateScope())
+        using (var scope = TestSetup.Fixture.Services.CreateScope())
         {
             var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
             var item = await svc.AddItemAsync(new ShoppingListItem
@@ -82,7 +79,7 @@ public class ShoppingListTests : PageTest
     public async Task ClearChecked_RemovesOnlyPurchasedItems()
     {
         int unpurchasedId;
-        using (var scope = Fixture.Services.CreateScope())
+        using (var scope = TestSetup.Fixture.Services.CreateScope())
         {
             var svc = scope.ServiceProvider.GetRequiredService<IShoppingListService>();
             var keep = await svc.AddItemAsync(new ShoppingListItem
@@ -105,7 +102,4 @@ public class ShoppingListTests : PageTest
         var keepLocator = Page.Locator($"[data-testid='shopping-item-{unpurchasedId}']");
         Assert.That(await keepLocator.CountAsync(), Is.EqualTo(1));
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

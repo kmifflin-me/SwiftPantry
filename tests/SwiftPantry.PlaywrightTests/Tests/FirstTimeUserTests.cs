@@ -7,20 +7,17 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: redirect to profile setup, form validation, successful submission,
 /// redirect to dashboard, calorie target displayed.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class FirstTimeUserTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private ProfilePage _profilePage = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
-        await Fixture.DeleteProfileAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.DeleteProfileAsync();
         _profilePage = new ProfilePage(Page, PlaywrightFixture.BaseUrl);
     }
 
@@ -49,7 +46,4 @@ public class FirstTimeUserTests : PageTest
         var text = await _profilePage.GetCalorieTargetTextAsync();
         Assert.That(text, Does.Contain("2,763").Or.Contain("2763"));
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

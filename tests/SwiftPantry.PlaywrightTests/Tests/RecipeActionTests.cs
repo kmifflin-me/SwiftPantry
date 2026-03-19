@@ -7,20 +7,17 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// TEST_PLAN.md Section B — Suite 4: Recipe Actions (save, unsave, add to shopping list)
 /// Covers: save recipe, toggle save/unsave, add missing ingredients to shopping list.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class RecipeActionTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private RecipeDetailPage _recipeDetailPage = null!;
     private ShoppingListPage _shoppingListPage = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _recipeDetailPage = new RecipeDetailPage(Page, PlaywrightFixture.BaseUrl);
         _shoppingListPage = new ShoppingListPage(Page, PlaywrightFixture.BaseUrl);
     }
@@ -81,11 +78,8 @@ public class RecipeActionTests : PageTest
 
     private async Task<int> GetShoppingListCountAsync()
     {
-        using var scope = Fixture.Services.CreateScope();
+        using var scope = TestSetup.Fixture.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         return db.ShoppingListItems.Count();
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

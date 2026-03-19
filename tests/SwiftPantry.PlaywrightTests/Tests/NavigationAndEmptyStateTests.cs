@@ -7,18 +7,14 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: nav links work, empty states shown when collections are empty,
 /// 404 handling for unknown recipe id.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class NavigationAndEmptyStateTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
-
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
     }
 
     [Test]
@@ -62,7 +58,4 @@ public class NavigationAndEmptyStateTests : PageTest
         var emptyState = Page.Locator("[data-testid='saved-recipes-empty-state']");
         Assert.That(await emptyState.IsVisibleAsync(), Is.True);
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

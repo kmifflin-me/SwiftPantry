@@ -117,15 +117,25 @@
                                     <span class="badge bg-secondary ms-1">@CategoryOrder.DisplayNames.GetValueOrDefault(item.Category, item.Category)</span>
                                 </div>
                             </div>
-                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
-                                  class="d-inline">
-                                <button type="submit"
-                                        class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Remove this item?')"
-                                        data-testid="shopping-item-delete-@item.Id">
-                                    Delete
-                                </button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <form method="post" asp-page-handler="MoveToPantry" asp-route-id="@item.Id"
+                                      class="d-inline move-to-pantry-inline" style="display:none!important">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-success"
+                                            data-testid="move-to-pantry-inline-@item.Id">
+                                        → Pantry
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
+                                      class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Remove this item?')"
+                                            data-testid="shopping-item-delete-@item.Id">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
                         </li>
                     }
                 </ul>

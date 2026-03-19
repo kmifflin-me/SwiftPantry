@@ -7,20 +7,17 @@ namespace SwiftPantry.PlaywrightTests.Tests;
 /// Covers: 18 recipes displayed, meal-type filter, ownership percentage,
 /// recipe detail page navigation.
 /// </summary>
+[NonParallelizable]
 [TestFixture]
 public class RecipeBrowsingTests : PageTest
 {
-    private static readonly PlaywrightFixture Fixture = new();
     private RecipeBrowserPage _recipeBrowserPage = null!;
     private RecipeDetailPage  _recipeDetailPage  = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp() => Fixture.CreateClient();
 
     [SetUp]
     public async Task SetUp()
     {
-        await Fixture.ResetDatabaseAsync();
+        await TestSetup.Fixture.ResetDatabaseAsync();
         _recipeBrowserPage = new RecipeBrowserPage(Page, PlaywrightFixture.BaseUrl);
         _recipeDetailPage  = new RecipeDetailPage(Page, PlaywrightFixture.BaseUrl);
     }
@@ -70,7 +67,4 @@ public class RecipeBrowsingTests : PageTest
         var title = await _recipeDetailPage.GetTitleAsync();
         Assert.That(title, Is.Not.Empty);
     }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown() => Fixture.Dispose();
 }

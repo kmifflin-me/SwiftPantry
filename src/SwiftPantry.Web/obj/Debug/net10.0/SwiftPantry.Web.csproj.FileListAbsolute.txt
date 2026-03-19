@@ -212,5 +212,5 @@ C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net1
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.pdb
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\SwiftPantry.Web.genruntimeconfig.cache
 C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\ref\SwiftPantry.Web.dll
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-eqde996x2v-eqde996x2v.gz
-C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-nn4607h18f-nn4607h18f.gz
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\1yzlnh38x0-{0}-6xz1mr6s8o-6xz1mr6s8o.gz
+C:\Users\Kaelan Mifflin\Documents\SwiftPantry\src\SwiftPantry.Web\obj\Debug\net10.0\compressed\mgk0dmh7xf-{0}-wxp0ymt0qm-wxp0ymt0qm.gz
